@@ -27,6 +27,31 @@
 import UIKit
 import WebKit
 
+struct YoutubePlayerConfiguration {
+    enum Color {
+        case white
+        case red
+    }
+
+    let isAutoplay: Bool // autoplay
+    let color: Color // color
+    let isControlPannelHidden: Bool // controls
+    // let isDisableKeyboard: Bool disablekb
+    // let isEnableJsAPI: Bool  enablejsapi
+    let startSeconds: UInt? // start
+    let endSeconds: UInt? // end
+    let isFullscreenButtonHidden: Bool // fs
+    let isAnnotationHidden: Bool // iv_load_policy
+    let isEnableLoop: Bool // loop
+    let isBrandLogoHidden: Bool // modestbranding
+    let isPlayInFullscreen: Bool // playsinline
+    let isRelationVideosHidden: Bool // rel
+
+    static func `default`() -> Self {
+        .init(isAutoplay: false, color: .white, isControlPannelHidden: true, startSeconds: nil, endSeconds: nil, isFullscreenButtonHidden: true, isAnnotationHidden: true, isEnableLoop: false, isBrandLogoHidden: true, isPlayInFullscreen: false, isRelationVideosHidden: true)
+    }
+}
+
 protocol YoutubePlayerViewDelegate: AnyObject {
     func youtubePlayer(_ view: YoutubePlayerView, didUpdateProgress: Float)
 }
