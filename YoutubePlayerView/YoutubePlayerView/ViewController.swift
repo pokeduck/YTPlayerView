@@ -28,6 +28,45 @@ import UIKit
 
 class ViewController: UIViewController {
     private lazy var playerView = YoutubePlayerView()
+    
+    private lazy var videoIdTextField: UITextField = {
+        let t = UITextField()
+        t.placeholder = "video id"
+        t.text = "a3ICNMQW7Ok"
+        t.borderStyle = .roundedRect
+        t.textAlignment = .center
+        return t
+    }()
+    
+    private lazy var durationLabel: UILabel = {
+        let l = UILabel()
+        l.text = "0"
+        l.textAlignment = .center
+        return l
+    }()
+    
+    private lazy var currentLabel: UILabel = {
+        let l = UILabel()
+        l.text = "0"
+        l.textAlignment = .center
+        return l
+    }()
+    
+    private lazy var stateLabel: UILabel = {
+        let l = UILabel()
+        l.text = "not working"
+        l.textAlignment = .center
+        return l
+    }()
+    
+    
+    private lazy var reloadButton: UIButton = {
+        let btn = UIButton(type: .system)
+        btn.setTitle("RELOAD", for: .normal)
+        btn.addTarget(self, action: #selector(reloadHandler), for: .touchUpInside)
+        return btn
+    }()
+    
     private lazy var playButton: UIButton = {
         let btn = UIButton(type: .system)
         btn.setTitle("PLAY", for: .normal)
@@ -65,31 +104,59 @@ class ViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        playerView.frame = .init(x: 20, y: 40, width: 300, height: 200)
+        playerView.delegate = self
+        playerView.frame = .init(x: 20, y: 40, width: 300, height: 300)
         view.addSubview(playerView)
+        playerView.backgroundColor = .green
+        playerView.translatesAutoresizingMaskIntoConstraints = false
+        playerView.leftAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leftAnchor).isActive = true
+        playerView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor).isActive = true
+        playerView.rightAnchor.constraint(equalTo: view.safeAreaLayoutGuide.rightAnchor).isActive = true
+        playerView.widthAnchor.constraint(equalTo: playerView.heightAnchor, multiplier: 16.0/9.0).isActive = true
         let pannelView = UIStackView()
-        pannelView.axis = .horizontal
+        pannelView.axis = .vertical
         pannelView.spacing = 20
         pannelView.alignment = .fill
         pannelView.distribution = .equalSpacing
         view.addSubview(pannelView)
         pannelView.translatesAutoresizingMaskIntoConstraints = false
-        pannelView.heightAnchor.constraint(equalToConstant: 50).isActive = true
-        pannelView.centerYAnchor.constraint(equalTo: view.centerYAnchor).isActive = true
+        //pannelView.heightAnchor.constraint(equalToConstant: 200).isActive = true
         pannelView.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
-
+        pannelView.topAnchor.constraint(equalTo: playerView.bottomAnchor, constant: 20).isActive = true
+        pannelView.leftAnchor.constraint(equalTo: view.leftAnchor).isActive = true
+        pannelView.rightAnchor.constraint(equalTo: view.rightAnchor).isActive = true
+        
+        
+        pannelView.addArrangedSubview(videoIdTextField)
+        pannelView.addArrangedSubview(currentLabel)
+        pannelView.addArrangedSubview(durationLabel)
+        pannelView.addArrangedSubview(stateLabel)
+        pannelView.addArrangedSubview(reloadButton)
         pannelView.addArrangedSubview(playButton)
         pannelView.addArrangedSubview(pauseButton)
         pannelView.addArrangedSubview(stopButton)
         pannelView.addArrangedSubview(durationButton)
         pannelView.addArrangedSubview(currentButton)
+        
+        let config = YoutubePlayerConfiguration.default()
+        print(config.json)
     }
 
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        playerView.loadYoutube(videoId: "a3ICNMQW7Ok")
+        
+    }
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
     }
 
+    
+    @objc func reloadHandler() {
+        playerView.loadYoutube(videoId: videoIdTextField.text ?? "",config: SettingStorage.shared.currentConfig())
+    }
+    
+    
+    
     @objc func playHandler() {
         playerView.play()
     }
@@ -103,14 +170,76 @@ class ViewController: UIViewController {
     }
 
     @objc func durationHandler() {
-        playerView.duration { value in
-            print(value)
+        playerView.duration { [weak self] value in
+            self?.durationLabel.text = "\(value)"
         }
     }
 
     @objc func currentHandler() {
-        playerView.currentTime { value in
-            print(value)
+        playerView.currentTime { [weak self] value in
+            self?.currentLabel.text = "\(value)"
         }
+    }
+    override var supportedInterfaceOrientations: UIInterfaceOrientationMask {
+        [.portrait]
+    }
+}
+
+extension ViewController: YoutubePlayerViewDelegate {
+    
+    
+    
+    func youtubePlayer(_ playerView: YoutubePlayerView, didUpdate current: Float, duration: Float) {
+        currentLabel.text = "\(current)"
+        let progress = current / duration
+        print(progress)
+    }
+    
+    func youtubePlayerBuffering(_ playerView: YoutubePlayerView) {
+        stateLabel.text = "Buffering!"
+    }
+    
+    func youtubePlayer(_ playerView: YoutubePlayerView, didUpdateState state: YoutubePlayerView.State) {
+        if state == .ready {
+            playerView.duration { [weak self] duration in
+                self?.durationLabel.text = "\(duration)"
+            }
+        }
+        stateLabel.text = state.rawValue
+    }
+}
+
+
+class SettingStorage {
+    var isAutoplay: Bool
+    var color: YoutubePlayerConfiguration.Color
+    var isControlPannelHidden: Bool
+    var startSeconds: UInt?
+    var endSeconds: UInt?
+    var isFullscreenButtonHidden: Bool
+    var isAnnotationHidden: Bool
+    var isEnableLoop: Bool
+    var isBrandLogoHidden: Bool
+    var isPlayInFullscreen: Bool
+    var isRelationVideosHidden: Bool
+    
+    private init() {
+        let d = YoutubePlayerConfiguration.default()
+        self.isAutoplay = d.isAutoplay
+        self.color = d.color
+        self.isControlPannelHidden = d.isControlPannelHidden
+        self.startSeconds = d.startSeconds
+        self.endSeconds = d.endSeconds
+        self.isFullscreenButtonHidden = d.isFullscreenButtonHidden
+        self.isAnnotationHidden = d.isAnnotationHidden
+        self.isEnableLoop = d.isEnableLoop
+        self.isBrandLogoHidden = d.isBrandLogoHidden
+        self.isPlayInFullscreen = d.isPlayInFullscreen
+        self.isRelationVideosHidden = d.isRelationVideosHidden
+    }
+    static let shared = SettingStorage()
+    
+    func currentConfig() -> YoutubePlayerConfiguration {
+        .init(isAutoplay: isAutoplay, color: color, isControlPannelHidden: isControlPannelHidden, isFullscreenButtonHidden: isFullscreenButtonHidden, isAnnotationHidden: isAnnotationHidden, isEnableLoop: isEnableLoop, isBrandLogoHidden: isBrandLogoHidden, isPlayInFullscreen: isPlayInFullscreen, isRelationVideosHidden: isRelationVideosHidden)
     }
 }
