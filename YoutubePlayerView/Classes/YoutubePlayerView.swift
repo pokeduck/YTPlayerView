@@ -223,7 +223,7 @@ public class YoutubePlayerView: UIView {
         case buffering
     }
     
-    private(set) var videoState = YoutubePlayerView.State.empty
+    public private(set) var videoState = YoutubePlayerView.State.empty
     
     private let JSBridgeKey = "JS_TO_NATIVE_BRIDGE"
     private let overridingConsoleLogName = "log"
