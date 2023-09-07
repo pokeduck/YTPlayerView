@@ -1,0 +1,16 @@
+PODS:
+  - YoutubePlayerView (0.1.0)
+
+DEPENDENCIES:
+  - YoutubePlayerView (from `../`)
+
+EXTERNAL SOURCES:
+  YoutubePlayerView:
+    :path: "../"
+
+SPEC CHECKSUMS:
+  YoutubePlayerView: 17a522db92351a6e9f6b20561bcfc15fd75dd8c4
+
+PODFILE CHECKSUM: 80dc9292439c68cf1a3d6c6e9f7bbd765f3fb901
+
+COCOAPODS: 1.12.1
