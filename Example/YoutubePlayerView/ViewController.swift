@@ -25,6 +25,7 @@
 //
 
 import UIKit
+import YoutubePlayerView
 
 class ViewController: UIViewController {
     private lazy var playerView = YoutubePlayerView()

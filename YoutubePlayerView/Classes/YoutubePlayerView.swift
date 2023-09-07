@@ -28,13 +28,13 @@ import UIKit
 import WebKit
 
 extension Bool {
-    var intValue: UInt {
+    fileprivate var intValue: UInt {
         self ? 1 : 0
     }
 }
 
-struct YoutubePlayerConfiguration {
-    init(isAutoplay: Bool, color: YoutubePlayerConfiguration.Color, isControlPannelHidden: Bool, startSeconds: UInt? = nil, endSeconds: UInt? = nil, isFullscreenButtonHidden: Bool, isAnnotationHidden: Bool, isEnableLoop: Bool, isBrandLogoHidden: Bool, isPlayInFullscreen: Bool, isRelationVideosHidden: Bool) {
+public struct YoutubePlayerConfiguration {
+    public init(isAutoplay: Bool, color: YoutubePlayerConfiguration.Color, isControlPannelHidden: Bool, startSeconds: UInt? = nil, endSeconds: UInt? = nil, isFullscreenButtonHidden: Bool, isAnnotationHidden: Bool, isEnableLoop: Bool, isBrandLogoHidden: Bool, isPlayInFullscreen: Bool, isRelationVideosHidden: Bool) {
         self.isAutoplay = isAutoplay
         self.color = color
         self.isControlPannelHidden = isControlPannelHidden
@@ -48,26 +48,26 @@ struct YoutubePlayerConfiguration {
         self.isRelationVideosHidden = isRelationVideosHidden
     }
     
-    enum Color: String {
+    public enum Color: String {
         case white
         case red
     }
 
-    let isAutoplay: Bool // autoplay
-    let color: Color // color
-    let isControlPannelHidden: Bool // controls
+    public let isAutoplay: Bool // autoplay
+    public let color: Color // color
+    public let isControlPannelHidden: Bool // controls
     // let isDisableKeyboard: Bool disablekb
     // let isEnableJsAPI: Bool  enablejsapi
-    let startSeconds: UInt? // start
-    let endSeconds: UInt? // end
-    let isFullscreenButtonHidden: Bool // fs
-    let isAnnotationHidden: Bool // iv_load_policy
-    let isEnableLoop: Bool // loop
-    let isBrandLogoHidden: Bool // modestbranding
-    let isPlayInFullscreen: Bool // playsinline
-    let isRelationVideosHidden: Bool // rel
+    public let startSeconds: UInt? // start
+    public let endSeconds: UInt? // end
+    public let isFullscreenButtonHidden: Bool // fs
+    public let isAnnotationHidden: Bool // iv_load_policy
+    public let isEnableLoop: Bool // loop
+    public let isBrandLogoHidden: Bool // modestbranding
+    public let isPlayInFullscreen: Bool // playsinline
+    public let isRelationVideosHidden: Bool // rel
 
-    static func `default`() -> Self {
+    public static func `default`() -> Self {
         .init(
             isAutoplay: true,
             color: .white,
@@ -83,7 +83,7 @@ struct YoutubePlayerConfiguration {
         )
     }
     
-    var json: String {
+    public var json: String {
         let model = JSVarModel.init(config: self)
         return model.jsonString
     }
@@ -130,7 +130,7 @@ struct YoutubePlayerConfiguration {
             case start
         }
         
-        init(config c: YoutubePlayerConfiguration) {
+        internal init(config c: YoutubePlayerConfiguration) {
             self.autoplay = c.isAutoplay.intValue
             self.ccLangPref = "en"
             self.ccLoadPolicy = nil
@@ -150,7 +150,7 @@ struct YoutubePlayerConfiguration {
             self.start = c.startSeconds
         }
         
-        init(autoplay: UInt? = nil, ccLangPref: String? = nil, ccLoadPolicy: UInt? = nil, color: String? = nil, controls: UInt? = nil, disablekb: UInt? = nil, enablejsapai: UInt? = nil, end: UInt? = nil, fs: UInt? = nil, hl: String? = nil, ivLoadPolicy: UInt? = nil, loop: UInt? = nil, origin: UInt? = nil, playlist: String? = nil, playsinline: UInt? = nil, rel: UInt? = nil, start: UInt? = nil) {
+        internal init(autoplay: UInt? = nil, ccLangPref: String? = nil, ccLoadPolicy: UInt? = nil, color: String? = nil, controls: UInt? = nil, disablekb: UInt? = nil, enablejsapai: UInt? = nil, end: UInt? = nil, fs: UInt? = nil, hl: String? = nil, ivLoadPolicy: UInt? = nil, loop: UInt? = nil, origin: UInt? = nil, playlist: String? = nil, playsinline: UInt? = nil, rel: UInt? = nil, start: UInt? = nil) {
             self.autoplay = autoplay
             self.ccLangPref = ccLangPref
             self.ccLoadPolicy = ccLoadPolicy
@@ -170,7 +170,7 @@ struct YoutubePlayerConfiguration {
             self.start = start
         }
         
-        var jsonString: String {
+        internal var jsonString: String {
             let jsonEncoder = JSONEncoder()
             if let jsonData = try? jsonEncoder.encode(self),
                let jsonStr = String(data: jsonData, encoding: .utf8) {
@@ -182,12 +182,12 @@ struct YoutubePlayerConfiguration {
     }
 }
 
-protocol YoutubePlayerViewDelegate: AnyObject {
+public protocol YoutubePlayerViewDelegate: AnyObject {
     func youtubePlayer(_ playerView: YoutubePlayerView,didUpdate current: Float, duration: Float)
     func youtubePlayer(_ playerView: YoutubePlayerView, didUpdateState state: YoutubePlayerView.State)
 }
 
-class YoutubePlayerView: UIView {
+public class YoutubePlayerView: UIView {
     fileprivate enum JSCommand: String {
         case play = "playVideoFromNative()"
         case pause = "pauseVideoFromNative()"
@@ -213,7 +213,7 @@ class YoutubePlayerView: UIView {
         static let currentTime = "current"
     }
     
-    enum State: String {
+    public enum State: String {
         case empty
         case ready
         case unstarted
@@ -225,10 +225,10 @@ class YoutubePlayerView: UIView {
     
     private(set) var videoState = YoutubePlayerView.State.empty
     
-    let JSBridgeKey = "JS_TO_NATIVE_BRIDGE"
-    let overridingConsoleLogName = "log"
+    private let JSBridgeKey = "JS_TO_NATIVE_BRIDGE"
+    private let overridingConsoleLogName = "log"
     private var webView: WKWebView?
-    weak var delegate: YoutubePlayerViewDelegate?
+    public weak var delegate: YoutubePlayerViewDelegate?
     private func createWebView() -> WKWebView {
         let config = WKWebViewConfiguration()
         config.allowsInlineMediaPlayback = true
@@ -245,7 +245,7 @@ class YoutubePlayerView: UIView {
         return webView
     }
 
-    func loadYoutube(videoId: String,config: YoutubePlayerConfiguration) {
+    public func loadYoutube(videoId: String,config: YoutubePlayerConfiguration) {
         webView?.removeFromSuperview()
         webView = createWebView()
         addSubview(webView!)
@@ -267,28 +267,28 @@ class YoutubePlayerView: UIView {
         return script
     }
 
-    func play() {
+    open func play() {
         evaluateJSForBool(command: .play) { result, error in
             print(result)
             print(error ?? "no error")
         }
     }
 
-    func pause() {
+    open func pause() {
         evaluateJSForBool(command: .pause) { result, error in
             print(result)
             print(error ?? "no error")
         }
     }
 
-    func stop() {
+    open func stop() {
         evaluateJSForBool(command: .stop) { result, error in
             print(result)
             print(error ?? "no error")
         }
     }
 
-    func duration(resultHandler : @escaping (Float) -> Void) {
+    open func duration(resultHandler : @escaping (Float) -> Void) {
         evaluateJSForFloat(command: .duration) { result, error in
             resultHandler(result)
             print(result)
@@ -296,7 +296,7 @@ class YoutubePlayerView: UIView {
         }
     }
 
-    func currentTime(resultHandler: @escaping (Float) -> Void) {
+    open func currentTime(resultHandler: @escaping (Float) -> Void) {
         evaluateJSForFloat(command: .currentTime) { result, error in
             resultHandler(result)
             print(result)
@@ -344,7 +344,7 @@ extension YoutubePlayerView: WKNavigationDelegate {}
 extension YoutubePlayerView: WKUIDelegate {}
 
 extension YoutubePlayerView: WKScriptMessageHandler {
-    func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
+    public func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
         guard let callbackDictionary = message.body as? [String:Any],
             let eventName = callbackDictionary["event"] as? String
         else {
