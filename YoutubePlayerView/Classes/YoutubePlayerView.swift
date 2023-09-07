@@ -69,7 +69,7 @@ public struct YoutubePlayerConfiguration {
 
     public static func `default`() -> Self {
         .init(
-            isAutoplay: true,
+            isAutoplay: false,
             color: .white,
             isControlPannelHidden: true,
             startSeconds: nil,
