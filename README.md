@@ -9,7 +9,7 @@ Play YouTube videos through a WKWebView
 Simply add the following line to your Podfile:
 
 ```ruby
-pod 'YoutubePlayerView',: git => 'https://github.com/pokeduck/YoutubePlayerView.git'
+pod 'YoutubePlayerView', :git => 'https://github.com/pokeduck/YoutubePlayerView.git'
 ```
 
 ## Requirements
