@@ -148,6 +148,7 @@ class ViewController: UIViewController {
     }
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
+        reloadHandler()
     }
 
     
@@ -193,10 +194,6 @@ extension ViewController: YoutubePlayerViewDelegate {
         currentLabel.text = "\(current)"
         let progress = current / duration
         print(progress)
-    }
-    
-    func youtubePlayerBuffering(_ playerView: YoutubePlayerView) {
-        stateLabel.text = "Buffering!"
     }
     
     func youtubePlayer(_ playerView: YoutubePlayerView, didUpdateState state: YoutubePlayerView.State) {
