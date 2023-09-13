@@ -16,6 +16,10 @@ pod 'YoutubePlayerView', :git => 'https://github.com/pokeduck/YoutubePlayerView.
 
 iOS 11.0
 
+## Inspired By
+
+* [youtube-ios-player-helper](https://github.com/youtube/youtube-ios-player-helper)
+
 ## License
 
 YoutubePlayerView is available under the MIT license. See the LICENSE file for more info.
