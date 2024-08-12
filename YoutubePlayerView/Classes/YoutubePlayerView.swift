@@ -188,12 +188,42 @@ public protocol YoutubePlayerViewDelegate: AnyObject {
 }
 
 public class YoutubePlayerView: UIView {
-    fileprivate enum JSCommand: String {
-        case play = "playVideoFromNative()"
-        case pause = "pauseVideoFromNative()"
-        case stop = "stopVideoFromNative()"
-        case duration = "durationFromNative()"
-        case currentTime = "currentTimeFromNative()"
+    fileprivate enum JSCommand {
+        case play
+        case pause
+        case stop
+        case duration
+        case currentTime
+        case mute
+        case unmute
+        case isMuted
+        case setVolume(value: Int)
+        case getVolume
+        
+        var rawCommand: String {
+            switch self {
+            case .play:
+                return "playVideoFromNative()"
+            case .pause:
+                return "pauseVideoFromNative()"
+            case .stop:
+                return "stopVideoFromNative()"
+            case .duration:
+                return "durationFromNative()"
+            case .currentTime:
+                return "currentTimeFromNative()"
+            case .mute:
+                return "muteVideoFromNative"
+            case .unmute:
+                return "unmuteVideoFromNative()"
+            case .isMuted:
+                return "isMutedFromNative()"
+            case .setVolume(let value):
+                return "setVolumeFromNative(\(value))"
+            case .getVolume:
+                return "getVolumeFromNative()"
+            }
+        }
     }
 
     fileprivate enum JSCallBackEventName {
@@ -245,12 +275,12 @@ public class YoutubePlayerView: UIView {
         return webView
     }
 
-    public func loadYoutube(videoId: String,config: YoutubePlayerConfiguration) {
+    public func loadYoutube(videoId: String,config: YoutubePlayerConfiguration,isMuteOnReady: Bool = false) {
         webView?.removeFromSuperview()
         webView = createWebView()
         addSubview(webView!)
         webView?.frame = bounds
-        webView?.loadHTMLString(buildYTHtml(with: videoId, size: bounds.size, vars: config.json), baseURL: nil)
+        webView?.loadHTMLString(buildYTHtml(with: videoId, size: bounds.size, vars: config.json, isMutedOnReady: isMuteOnReady), baseURL: nil)
     }
     
 
@@ -303,16 +333,40 @@ public class YoutubePlayerView: UIView {
             print(error ?? "no error")
         }
     }
+    
+    open func setVolume(value: Int) {
+        evaluateJSForBool(command: .setVolume(value: value)) { result, error in
+            print(result)
+            print(error ?? "no error")
+        }
+    }
+    
+    open func getVolume(resultHandler: @escaping (Float) -> Void) {
+        evaluateJSForFloat(command: .getVolume) { result, error in
+            resultHandler(result)
+            print(result)
+            print(error ?? "no error")
+        }
+    }
+    
+    
+    
+    open func unmute() {
+        evaluateJSForBool(command: .unmute) { result, error in
+            print(result)
+            print(error ?? "no error")
+        }
+    }
 
     private func evaluateJSForBool(command: JSCommand, completeHandler: ((_ result: Bool, _ error: Error?) -> Void)?) {
-        webView?.evaluateJavaScript(command.rawValue, completionHandler: { obj, error in
+        webView?.evaluateJavaScript(command.rawCommand, completionHandler: { obj, error in
             let result = obj as? Bool ?? false
             completeHandler?(result, error)
         })
     }
 
     private func evaluateJSForFloat(command: JSCommand, completeHandler: ((_ result: Float, _ error: Error?) -> Void)?) {
-        webView?.evaluateJavaScript(command.rawValue, completionHandler: { obj, error in
+        webView?.evaluateJavaScript(command.rawCommand, completionHandler: { obj, error in
             let result = obj as? NSNumber ?? 0.0
             completeHandler?(result.floatValue, error)
         })
@@ -394,7 +448,7 @@ extension YoutubePlayerView: WKScriptMessageHandler {
 }
 
 extension YoutubePlayerView {
-    fileprivate func buildYTHtml(with videoId: String, size: CGSize, vars: String) -> String {
+    fileprivate func buildYTHtml(with videoId: String, size: CGSize, vars: String,isMutedOnReady: Bool) -> String {
         let htmlString =
 """
 <!DOCTYPE html>
@@ -446,7 +500,7 @@ extension YoutubePlayerView {
 
       // 4. The API will call this function when the video player is ready.
       function onPlayerReady(event) {
-          event.target.mute();
+          \(isMutedOnReady ? "event.target.mute();" : "event.target.unMute();")
           sendMessageToNative('ready');
           durationTime = player.getDuration();
           //  event.target.playVideo();
@@ -518,9 +572,32 @@ extension YoutubePlayerView {
               clearInterval(timerId);
           }
       }
-      function unmuteVideo() {
-          //player.target.unMute();
-          console.log(`[JS_LOG]${unmute}`);
+      function setVolumeFromNative(value) {
+          player.setVolume(value)
+          console.log(`[JS_LOG] Set Volumn: ${value}`);
+          return true;
+      }
+
+      function getVolumeFromNative() {
+          console.log(`[JS_LOG] Get Volumn`);
+          return player.getVolume()
+      }
+
+      function isMutedVideoFromNative() {
+          console.log(`[JS_LOG] get mute state`);
+          return player.isMuted();
+      }
+        
+      function muteVideoFromNative() {
+          player.mute();
+          console.log(`[JS_LOG] Mute! `);
+          return true;
+      }
+        
+      function unmuteVideoFromNative() {
+          player.unMute();
+          console.log(`[JS_LOG] Unmute!`);
+          return true;
       }
       function playVideoFromNative() {
           player.playVideo();

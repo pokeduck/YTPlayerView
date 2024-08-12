@@ -102,6 +102,13 @@ class ViewController: UIViewController {
         btn.addTarget(self, action: #selector(currentHandler), for: .touchUpInside)
         return btn
     }()
+    
+    private lazy var getVolumeButton: UIButton = {
+        let btn = UIButton(type: .system)
+        btn.setTitle("GET VOLUME", for: .normal)
+        btn.addTarget(self, action: #selector(volumeHandler), for: .touchUpInside)
+        return btn
+    }()
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -116,7 +123,7 @@ class ViewController: UIViewController {
         playerView.widthAnchor.constraint(equalTo: playerView.heightAnchor, multiplier: 16.0/9.0).isActive = true
         let pannelView = UIStackView()
         pannelView.axis = .vertical
-        pannelView.spacing = 20
+        pannelView.spacing = 10
         pannelView.alignment = .fill
         pannelView.distribution = .equalSpacing
         view.addSubview(pannelView)
@@ -138,6 +145,7 @@ class ViewController: UIViewController {
         pannelView.addArrangedSubview(stopButton)
         pannelView.addArrangedSubview(durationButton)
         pannelView.addArrangedSubview(currentButton)
+        pannelView.addArrangedSubview(getVolumeButton)
         
         let config = YoutubePlayerConfiguration.default()
         print(config.json)
@@ -154,7 +162,7 @@ class ViewController: UIViewController {
 
     
     @objc func reloadHandler() {
-        playerView.loadYoutube(videoId: videoIdTextField.text ?? "",config: SettingStorage.shared.currentConfig())
+        playerView.loadYoutube(videoId: videoIdTextField.text ?? "",config: SettingStorage.shared.currentConfig(),isMuteOnReady: true)
     }
     
     
@@ -182,6 +190,14 @@ class ViewController: UIViewController {
             self?.currentLabel.text = "\(value)"
         }
     }
+    
+    @objc func volumeHandler() {
+        playerView.getVolume { value in
+            print(value)
+        }
+    }
+    
+    
     override var supportedInterfaceOrientations: UIInterfaceOrientationMask {
         [.portrait]
     }
@@ -199,6 +215,8 @@ extension ViewController: YoutubePlayerViewDelegate {
     
     func youtubePlayer(_ playerView: YoutubePlayerView, didUpdateState state: YoutubePlayerView.State) {
         if state == .ready {
+            playerView.unmute()
+            playerView.setVolume(value: 50)
             playerView.duration { [weak self] duration in
                 self?.durationLabel.text = "\(duration)"
             }
