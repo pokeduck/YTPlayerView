@@ -1,7 +1,7 @@
 
 Pod::Spec.new do |s|
   s.name             = 'YoutubePlayerView'
-  s.version          = '0.1.3'
+  s.version          = '0.1.4'
   s.summary          = 'Play YouTube videos through a WKWebView'
 
   s.description      = <<-DESC
