@@ -4,6 +4,10 @@ Play YouTube videos through a WKWebView
 
 - IFrame Player API: https://developers.google.com/youtube/iframe_api_reference
 
+## Workflow
+
+![](workflow.jpg)
+
 ## Installation
 
 Simply add the following line to your Podfile:
@@ -18,7 +22,7 @@ iOS 11.0
 
 ## Inspired By
 
-* [youtube-ios-player-helper](https://github.com/youtube/youtube-ios-player-helper)
+- [youtube-ios-player-helper](https://github.com/youtube/youtube-ios-player-helper)
 
 ## License
 
